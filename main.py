@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 import requests
 import random
 import os
-import asyncio
+import datetime
 import threading
 import time
 
@@ -42,6 +42,10 @@ class Main(tk.Frame):
                 if(x.typename == "GraphImage"):
                     count += 1
                     self.posts.append(x.url)
+                elif(x.typename == "GraphSidecar"):
+                    for y in x.get_sidecar_nodes():
+                        if(not y.is_video):
+                            self.posts.append(y.display_url)
                 while(count % 20 == 0 and not self.image_num % 15 == 0 and self.isRunning):
                     time.sleep(0.001)
             else:
@@ -63,12 +67,10 @@ class Main(tk.Frame):
         global raw
         if(not os.path.isdir("memes")):
             os.mkdir("memes")
-        filename = chr(random.randrange(48, 122)) + chr(random.randrange(48, 122)) + chr(random.randrange(48, 122)) + chr(random.randrange(48, 122)) + chr(random.randrange(48, 122))
-        print(filename + ".jpg")
-        out = open("memes/" + filename + ".jpg", "wb+")
+        out = open("memes/" + datetime.datetime.now().strftime("%d-%m-%y %H-%M-%S") + str(random.randint(0, 100)) + ".jpg", "wb+")
         out.write(raw)
         out.close()
-        self.widgetHandler()
+        self.ImageHandler()
 
     def processimage(self):
         max = (600, 600)
@@ -80,20 +82,11 @@ class Main(tk.Frame):
         photo = ImageTk.PhotoImage(img)
         return photo
 
-    def widgetHandler(self):
+    def ImageHandler(self):
         photo = self.getImage()
-        if(self.label == None):
-            self.label = tk.Label(image=photo)
-            self.label.image = photo
-        else:
-            self.label = tk.Label(image=photo, width=600, height=600)
-            self.label.image = photo
-        left_arrow = tk.Button(text="Delete", command=self.widgetHandler)
-        right_arrow = tk.Button(text="Save", command=self.savePhoto)
+        self.label = tk.Label(image=photo, width=600, height=600)
+        self.label.image = photo
         self.label.grid(row=0, column=0, columnspan=3)
-        left_arrow.grid(row=1, column=0)
-        right_arrow.grid(row=1, column=2)
-
 
     def main(self, master):
         global posts
@@ -103,19 +96,20 @@ class Main(tk.Frame):
         l.login(user, passwd)
         x = threading.Thread(target=self.getPosts)
         x.start()
-        time.sleep(4)
-        y = threading.Thread(target=self.widgetHandler)
+        left_arrow = tk.Button(text="Delete", command=self.ImageHandler)
+        right_arrow = tk.Button(text="Save", command=self.savePhoto)
+        left_arrow.grid(row=1, column=0)
+        right_arrow.grid(row=1, column=2)
+        time.sleep(5)
+        y = threading.Thread(target=self.ImageHandler)
         y.start()
         self.mainloop()
         self.isRunning = False
-        x.join()
-        y.join()
         exit(0)
-
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Instaviewer v0.1")
-    root.geometry("600x650")
+    root.title("Instaviewer v0.6")
+    root.geometry("600x640")
     root.resizable(False, False)
     app = Main(master=root)
