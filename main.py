@@ -63,7 +63,7 @@ class Main(tk.Frame):
         img = self.processimage()
         return img
 
-    def savePhoto(self):
+    def savePhoto(self, event=None):
         global raw
         if(not os.path.isdir("memes")):
             os.mkdir("memes")
@@ -82,11 +82,12 @@ class Main(tk.Frame):
         photo = ImageTk.PhotoImage(img)
         return photo
 
-    def ImageHandler(self):
+    def ImageHandler(self, event=None):
         photo = self.getImage()
         self.label = tk.Label(image=photo, width=600, height=600)
         self.label.image = photo
         self.label.grid(row=0, column=0, columnspan=3)
+
 
     def main(self, master):
         global posts
@@ -98,6 +99,8 @@ class Main(tk.Frame):
         x.start()
         left_arrow = tk.Button(text="Delete", command=self.ImageHandler)
         right_arrow = tk.Button(text="Save", command=self.savePhoto)
+        master.bind('<Left>', self.ImageHandler)
+        master.bind('<Right>', self.savePhoto)
         left_arrow.grid(row=1, column=0)
         right_arrow.grid(row=1, column=2)
         time.sleep(5)
@@ -109,7 +112,7 @@ class Main(tk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Instaviewer v0.6")
+    root.title("Instaviewer v0.8")
     root.geometry("600x640")
     root.resizable(False, False)
     app = Main(master=root)
